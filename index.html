@@ -4,13 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saray Anime</title>
-    <!-- الرابط الجديد -->
-    <meta http-equiv="refresh" content="0; url=https://nasty-eel-2.loca.lt">
-    <script>
-        window.location.href = "https://nasty-eel-2.loca.lt";
-    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            position: relative;
+        }
+
+        /* حاوية النجوم */
+        .stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* شكل النجمة */
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+            opacity: var(--opacity);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* المحتوى والواجهة */
+        .content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-width: 85%;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff4b2b, #ff416c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 65, 108, 0.4);
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #d1d5db;
+        }
+    </style>
 </head>
-<body style="background-color: #121212; color: white; text-align: center; padding-top: 30vh; font-family: sans-serif;">
-    <h2>جاري تحويلك لتطبيق Saray Anime... 🚀</h2>
+<body>
+
+    <div class="stars-container" id="stars"></div>
+
+    <div class="content">
+        <h1>✨ Saray Anime ✨</h1>
+        <p>أهلاً بك في عالم الأنيمي الخاص بك 🌌</p>
+    </div>
+
+    <script>
+        const starsContainer = document.getElementById('stars');
+        const numberOfStars = 80;
+
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            const size = Math.random() * 3 + 1 + 'px';
+            star.style.width = size;
+            star.style.height = size;
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            
+            star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            star.style.setProperty('--opacity', Math.random() * 0.7 + 0.3);
+            
+            starsContainer.appendChild(star);
+        }
+    </script>
 </body>
 </html>
