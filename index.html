@@ -211,21 +211,32 @@
 
         let currentPage = 1;
         let isLoading = false;
-        let hasMore = true;
+
+        // إضافة عنصر المراقبة بأسفل الصفحة
+        const appContainer = document.querySelector('.app-container');
+        const sentinel = document.createElement('div');
+        sentinel.id = 'sentinel';
+        sentinel.style.cssText = 'height: 60px; display: flex; align-items: center; justify-content: center; color: #8ab4f8; font-size: 0.9rem; margin-top: 15px; width: 100%; grid-column: 1 / -1;';
+        sentinel.innerText = 'جاري تحميل المزيد... 🚀';
+        appContainer.appendChild(sentinel);
 
         async function fetchAnime() {
-            if (isLoading || !hasMore) return;
+            if (isLoading) return;
             isLoading = true;
 
             const container = document.getElementById('animeContainer');
 
             try {
+                // انتظار ثانيتين بين كل طلب وطلب لتجنب حظر السيرفر
                 const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${currentPage}&limit=20`);
-                if (!res.ok) throw new Error('Network error');
                 
+                if (res.status === 429) {
+                    sentinel.innerText = 'انتظر ثانية... جاري جلب الأنميات ⏳';
+                    setTimeout(() => { isLoading = false; fetchAnime(); }, 2000);
+                    return;
+                }
+
                 const data = await res.json();
-                
-                if (currentPage === 1) container.innerHTML = '';
 
                 if (data.data && data.data.length > 0) {
                     data.data.forEach(anime => {
@@ -247,31 +258,25 @@
                         container.appendChild(card);
                     });
                     currentPage++;
-                    hasMore = data.pagination ? data.pagination.has_next_page : false;
+                    sentinel.innerText = 'جاري تحميل المزيد... 🚀';
                 } else {
-                    hasMore = false;
+                    sentinel.innerText = 'وصلت لنهاية الأنميات ✨';
                 }
             } catch(e) {
-                console.error('Error fetching anime:', e);
+                sentinel.innerText = 'حدث خطأ بالاتصال، جاري إعادة المحاولة...';
             } finally {
-                // تقليل فترة الانتظار لتحديث أسرع مع حماية من حظر الـ API
-                setTimeout(() => { isLoading = false; }, 500);
+                setTimeout(() => { isLoading = false; }, 1500);
             }
         }
 
-        // دالة دقيقة لاستشعار الاقتراب من أسفل الصفحة
-        function handleScroll() {
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight;
-            const clientHeight = window.innerHeight;
-
-            if (scrollTop + clientHeight >= scrollHeight - 600) {
+        // مراقب الرؤية الأسطوري (Intersection Observer)
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
                 fetchAnime();
             }
-        }
+        }, { rootMargin: '200px' });
 
-        window.addEventListener('scroll', handleScroll);
-        fetchAnime();
+        observer.observe(sentinel);
     </script>
 </body>
 </html>
