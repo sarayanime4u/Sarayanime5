@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- إجبار المتصفح والتطبيق على عدم خزن الكاش وتحديث الصفحة تلقائياً -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>Saray Anime</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -143,6 +148,16 @@
     </div>
 
     <script>
+        // إلغاء أي كاش قديم لتحديث النسخة أوتوماتيكياً لدى كافة المستخدمين
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+
+        // إنشاء النجوم
         const container = document.getElementById('starsContainer');
         const count = 120;
 
