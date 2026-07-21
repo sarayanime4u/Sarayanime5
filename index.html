@@ -295,7 +295,7 @@
 
         <div id="animeContainer" class="anime-grid"></div>
     <script>
-        // 1. إضافة تنسيقات المشغل المتعدد السيرفرات
+        // 1. إضافة أنماط المودال والمشغل الداخلي
         const appStyle = document.createElement('style');
         appStyle.innerHTML = `
             .details-modal {
@@ -307,14 +307,14 @@
             .details-modal.active { display: block; opacity: 1; }
             .close-btn {
                 position: fixed; top: 20px; right: 20px;
-                width: 42px; height: 42px; background: rgba(255, 255, 255, 0.15);
-                backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);
+                width: 42px; height: 42px; background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3);
                 border-radius: 50%; color: #fff; font-size: 1.2rem;
                 display: flex; align-items: center; justify-content: center;
                 cursor: pointer; z-index: 10001;
             }
             .banner-header { position: relative; width: 100%; height: 230px; background-size: cover; background-position: center; }
-            .banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(10,14,23,0.1) 0%, #0a0e17 100%); }
+            .banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(10,14,23,0.2) 0%, #0a0e17 100%); }
             .modal-body { padding: 0 18px; margin-top: -50px; position: relative; z-index: 10002; }
             .detail-header-flex { display: flex; gap: 14px; align-items: flex-end; margin-bottom: 20px; }
             .modal-poster { width: 110px; height: 160px; border-radius: 14px; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); box-shadow: 0 8px 25px rgba(0,0,0,0.8); flex-shrink: 0; }
@@ -328,43 +328,30 @@
             .ep-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 8px; border-radius: 12px; text-align: center; color: #e0e6ed; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
             .ep-card:active { background: rgba(138, 180, 248, 0.3); border-color: #8ab4f8; color: #fff; }
 
-            /* 🎬 المشغل السينمائي المحسن */
+            /* 🎬 المشغل السينمائي */
             .player-modal {
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                 background: #000; z-index: 20000; display: none;
-                flex-direction: column; justify-content: space-between; align-items: center;
+                flex-direction: column; justify-content: center; align-items: center;
             }
             .player-modal.active { display: flex; }
             .player-header {
-                width: 100%; padding: 15px 20px; display: flex;
-                justify-content: space-between; align-items: center;
+                position: absolute; top: 0; left: 0; width: 100%; padding: 15px 20px;
+                display: flex; justify-content: space-between; align-items: center;
                 background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); z-index: 20002;
             }
             .player-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
             .close-player-btn {
                 background: rgba(255,255,255,0.2); border: none; color: #fff;
-                width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem;
+                width: 38px; height: 38px; border-radius: 50%; font-size: 1.1rem;
                 display: flex; align-items: center; justify-content: center; cursor: pointer;
             }
-            .video-container { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; background: #000; }
-            .video-container iframe { width: 100%; height: 100%; max-height: 80vh; border: none; }
-            
-            /* أزرار السيرفرات */
-            .server-selector {
-                width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.95);
-                display: flex; justify-content: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.1);
-            }
-            .server-btn {
-                background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-                color: #c5d1e0; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem;
-                cursor: pointer; transition: 0.2s;
-            }
-            .server-btn.active {
-                background: #8ab4f8; color: #0a0e17; font-weight: bold; border-color: #8ab4f8;
-            }
+            .video-container { width: 100%; max-width: 900px; aspect-ratio: 16/9; background: #000; position: relative; }
+            .video-container iframe { width: 100%; height: 100%; border: none; }
         `;
         document.head.appendChild(appStyle);
 
+        // 2. هيكلية نافذة التفاصيل والمشغل
         const playerHTML = `
         <div id="detailsModal" class="details-modal">
             <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -383,12 +370,11 @@
                 </div>
                 <div class="synopsis-title"><i class="fa-solid fa-align-right"></i> القصة:</div>
                 <div id="modalSynopsis" class="synopsis-text">...</div>
-                <div class="episodes-sec-title"><i class="fa-solid fa-list-ol" style="color: #8ab4f8;"></i> اختر الحلقة للمشاهدة:</div>
+                <div class="episodes-sec-title"><i class="fa-solid fa-list-ol" style="color: #8ab4f8;"></i> الحلقات المتوفرة:</div>
                 <div id="episodesGrid" class="episodes-grid"></div>
             </div>
         </div>
 
-        <!-- نافذة المشغل المدمجة متعددة السيرفرات -->
         <div id="playerModal" class="player-modal">
             <div class="player-header">
                 <div id="playerTitle" class="player-title">مشاهدة الحلقة</div>
@@ -397,16 +383,11 @@
             <div class="video-container">
                 <iframe id="videoIframe" src="" allow="autoplay; fullscreen" referrerpolicy="no-referrer" allowfullscreen></iframe>
             </div>
-            <div class="server-selector">
-                <button class="server-btn active" onclick="switchServer(1)">سيرفر 1 (سريع)</button>
-                <button class="server-btn" onclick="switchServer(2)">سيرفر 2 (جودة عالية)</button>
-                <button class="server-btn" onclick="switchServer(3)">سيرفر 3 (احتياطي)</button>
-            </div>
         </div>
         `;
         document.body.insertAdjacentHTML('beforeend', playerHTML);
 
-        // النجوم
+        // 3. النجوم الثابتة
         const starsContainer = document.getElementById('starsContainer');
         for (let i = 0; i < 40; i++) {
             const star = document.createElement('div');
@@ -419,8 +400,7 @@
             starsContainer.appendChild(star);
         }
 
-        let currentMalId = null;
-        let currentEpNum = 1;
+        // 4. جلب الأنميات من AniList API
         let currentPage = 1;
         let isLoading = false;
         let hasNextPage = true;
@@ -513,12 +493,13 @@
             const epGrid = document.getElementById('episodesGrid');
             epGrid.innerHTML = '';
             const totalEps = anime.episodes || 24;
+            const animeId = anime.idMal || anime.id;
             
             for (let i = 1; i <= Math.min(totalEps, 50); i++) {
                 const epCard = document.createElement('div');
                 epCard.className = 'ep-card';
                 epCard.innerText = `حلقة ${i}`;
-                epCard.onclick = () => playEpisode(title, i, anime.idMal || anime.id);
+                epCard.onclick = () => playEpisode(title, i, animeId);
                 epGrid.appendChild(epCard);
             }
 
@@ -531,37 +512,22 @@
             document.body.style.overflow = 'auto';
         }
 
-        function playEpisode(animeTitle, epNum, malId) {
-            currentMalId = malId;
-            currentEpNum = epNum;
+        function playEpisode(animeTitle, epNum, id) {
+            const playerModal = document.getElementById('playerModal');
+            const playerTitle = document.getElementById('playerTitle');
+            const videoIframe = document.getElementById('videoIframe');
 
-            document.getElementById('playerTitle').innerText = `${animeTitle} - حلقة ${epNum}`;
-            switchServer(1);
+            playerTitle.innerText = `${animeTitle} - حلقة ${epNum}`;
             
-            document.getElementById('playerModal').classList.add('active');
-        }
-
-        function switchServer(serverNum) {
-            const iframe = document.getElementById('videoIframe');
-            const btns = document.querySelectorAll('.server-btn');
-            btns.forEach((btn, idx) => {
-                if (idx === serverNum - 1) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-
-            // سيرفرات مدمجة موثوقة تضمن التشغيل وتتجاوز الحظر
-            if (serverNum === 1) {
-                iframe.src = `https://vidsrc.cc/v2/embed/anime/${currentMalId}/${currentEpNum}`;
-            } else if (serverNum === 2) {
-                iframe.src = `https://embed.su/embed/anime/${currentMalId}/${currentEpNum}`;
-            } else if (serverNum === 3) {
-                iframe.src = `https://2embed.org/embed/anime/${currentMalId}/${currentEpNum}`;
-            }
+            // رابط مشغل معالج موثوق وسريع يمنع الشاشة السوداء
+            videoIframe.src = `https://vidsrc.pro/embed/anime/${id}/${epNum}`;
+            
+            playerModal.classList.add('active');
         }
 
         function closePlayer() {
-            const iframe = document.getElementById('videoIframe');
-            iframe.src = '';
+            const videoIframe = document.getElementById('videoIframe');
+            videoIframe.src = '';
             document.getElementById('playerModal').classList.remove('active');
         }
 
