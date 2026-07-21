@@ -295,6 +295,67 @@
 
         <div id="animeContainer" class="anime-grid"></div>
     <script>
+        // 1. بناء تصميم وحاوية التفاصيل تلقائياً داخل الصفحة
+        const modalStyle = document.createElement('style');
+        modalStyle.innerHTML = `
+            .details-modal {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: #0a0e17; z-index: 10000; overflow-y: auto;
+                display: none; opacity: 0; transition: opacity 0.25s ease;
+                padding-bottom: 40px;
+            }
+            .details-modal.active { display: block; opacity: 1; }
+            .close-btn {
+                position: fixed; top: 20px; right: 20px;
+                width: 42px; height: 42px; background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 50%; color: #fff; font-size: 1.2rem;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; z-index: 10001;
+            }
+            .banner-header { position: relative; width: 100%; height: 230px; background-size: cover; background-position: center; }
+            .banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(10,14,23,0.1) 0%, #0a0e17 100%); }
+            .modal-body { padding: 0 18px; margin-top: -50px; position: relative; z-index: 10002; }
+            .detail-header-flex { display: flex; gap: 14px; align-items: flex-end; margin-bottom: 20px; }
+            .modal-poster { width: 110px; height: 160px; border-radius: 14px; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); box-shadow: 0 8px 25px rgba(0,0,0,0.8); flex-shrink: 0; }
+            .modal-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.3; }
+            .modal-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+            .m-badge { background: rgba(138, 180, 248, 0.12); border: 1px solid rgba(138, 180, 248, 0.3); color: #8ab4f8; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; }
+            .synopsis-title { font-size: 0.95rem; color: #8ab4f8; margin: 20px 0 8px 0; font-weight: 700; }
+            .synopsis-text { font-size: 0.88rem; color: #c5d1e0; line-height: 1.6; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+            .episodes-sec-title { font-size: 0.95rem; color: #fff; margin: 22px 0 12px 0; font-weight: 700; }
+            .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+            .ep-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 8px; border-radius: 12px; text-align: center; color: #e0e6ed; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+            .ep-card:active { background: rgba(138, 180, 248, 0.25); border-color: #8ab4f8; color: #fff; }
+        `;
+        document.head.appendChild(modalStyle);
+
+        const modalHTML = `
+        <div id="detailsModal" class="details-modal">
+            <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modalBanner" class="banner-header"><div class="banner-overlay"></div></div>
+            <div class="modal-body">
+                <div class="detail-header-flex">
+                    <img id="modalPoster" class="modal-poster" src="" alt="">
+                    <div>
+                        <div id="modalTitle" class="modal-title">...</div>
+                        <div class="modal-badges">
+                            <span id="modalScore" class="m-badge">⭐ 0.0</span>
+                            <span id="modalFormat" class="m-badge">TV</span>
+                            <span id="modalEps" class="m-badge">0 حلقة</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="synopsis-title"><i class="fa-solid fa-align-right"></i> القصة:</div>
+                <div id="modalSynopsis" class="synopsis-text">...</div>
+                <div class="episodes-sec-title"><i class="fa-solid fa-list-ol" style="color: #8ab4f8;"></i> الحلقات:</div>
+                <div id="episodesGrid" class="episodes-grid"></div>
+            </div>
+        </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // 2. النجوم السريعة
         const starsContainer = document.getElementById('starsContainer');
         for (let i = 0; i < 40; i++) {
             const star = document.createElement('div');
@@ -307,6 +368,7 @@
             starsContainer.appendChild(star);
         }
 
+        // 3. جلب الأنميات والربط مع الضغط
         let currentPage = 1;
         let isLoading = false;
         let hasNextPage = true;
@@ -348,6 +410,7 @@
                 pageData.media.forEach(anime => {
                     const card = document.createElement('div');
                     card.className = 'anime-card';
+                    card.style.cursor = 'pointer';
                     card.onclick = () => openDetails(anime);
                     
                     const title = anime.title.english || anime.title.romaji || anime.title.native;
@@ -390,15 +453,13 @@
             document.getElementById('modalFormat').innerText = anime.format || 'TV';
             document.getElementById('modalEps').innerText = anime.episodes ? `${anime.episodes} حلقة` : 'مستمر';
             
-            // ينظف الوصف من أوسام HTML
             let desc = anime.description || 'لا توجد قصة متاحة حالياً.';
             desc = desc.replace(/<[^>]*>?/gm, '');
             document.getElementById('modalSynopsis').innerText = desc;
 
-            // توليد شبكة الحلقات
             const epGrid = document.getElementById('episodesGrid');
             epGrid.innerHTML = '';
-            const totalEps = anime.episodes || 12; // افتراضي إذا كان مستمر
+            const totalEps = anime.episodes || 12;
             for (let i = 1; i <= Math.min(totalEps, 50); i++) {
                 const epCard = document.createElement('div');
                 epCard.className = 'ep-card';
