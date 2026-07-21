@@ -187,80 +187,63 @@
         </div>
     </div>
 
-<script>
-    let currentPage = 1;
-    let isLoading = false;
-    let hasNextPage = true;
-
-    async function fetchTopAnime(page = 1) {
-        if (isLoading || !hasNextPage) return;
-        isLoading = true;
-
-        const container = document.getElementById('animeContainer');
-        
-        // إظهار مؤشر التحميل السفلي
-        let loader = document.getElementById('scrollLoader');
-        if (!loader) {
-            loader = document.createElement('div');
-            loader.id = 'scrollLoader';
-            loader.className = 'loading-text';
-            loader.style.gridColumn = '1 / -1';
-            loader.innerText = 'جاري تحميل المزيد من الأنميات... 🚀';
-            container.appendChild(loader);
+    <script>
+        const starsContainer = document.getElementById('starsContainer');
+        for (let i = 0; i < 40; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            starsContainer.appendChild(star);
         }
 
-        try {
-            const response = await fetch(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=20`);
-            const result = await response.json();
-            const animeList = result.data;
-            hasNextPage = result.pagination.has_next_page;
+        let currentPage = 1;
+        let isLoading = false;
 
-            // مسح كلمة التحميل الأولى أو مؤشر السكرول
-            if (page === 1) container.innerHTML = '';
-            else if (loader) loader.remove();
-
-            animeList.forEach(anime => {
-                const card = document.createElement('div');
-                card.className = 'anime-card';
+        async function fetchAnime(page) {
+            if (isLoading) return;
+            isLoading = true;
+            const container = document.getElementById('animeContainer');
+            
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=20`);
+                const data = await res.json();
                 
-                const score = anime.score ? anime.score : 'N/A';
-                const episodes = anime.episodes ? `${anime.episodes} حلقة` : 'مستمر';
+                if (page === 1) container.innerHTML = '';
 
-                card.innerHTML = `
-                    <div class="poster-wrapper">
-                        <img class="poster-img" src="${anime.images.jpg.large_image_url}" alt="${anime.title}" loading="lazy">
-                        <div class="rating-badge">
-                            <i class="fa-solid fa-star"></i> ${score}
+                data.data.forEach(anime => {
+                    const card = document.createElement('div');
+                    card.className = 'anime-card';
+                    card.innerHTML = `
+                        <div class="poster-wrapper">
+                            <img class="poster-img" src="${anime.images.jpg.large_image_url}" loading="lazy">
+                            <div class="rating-badge"><i class="fa-solid fa-star"></i> ${anime.score || 'N/A'}</div>
                         </div>
-                    </div>
-                    <div class="anime-info">
-                        <div class="anime-title">${anime.title}</div>
-                        <div class="anime-meta">
-                            <span>${anime.type || 'TV'}</span>
-                            <span>${episodes}</span>
+                        <div class="anime-info">
+                            <div class="anime-title">${anime.title}</div>
+                            <div class="anime-meta">
+                                <span>${anime.type || 'TV'}</span>
+                                <span>${anime.episodes ? anime.episodes + ' حلقة' : 'مستمر'}</span>
+                            </div>
                         </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
-            currentPage++;
-        } catch (error) {
-            console.error(error);
-        } finally {
+                    `;
+                    container.appendChild(card);
+                });
+                currentPage++;
+            } catch(e) {}
             isLoading = false;
-            const currentLoader = document.getElementById('scrollLoader');
-            if (currentLoader) currentLoader.remove();
         }
-    }
 
-    // استشعار الوصول لأسفل الصفحة (Infinite Scroll)
-    window.addEventListener('scroll', () => {
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
-            fetchTopAnime(currentPage);
-        }
-    });
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 400) {
+                fetchAnime(currentPage);
+            }
+        });
 
-    // أول تحميل
-    fetchTopAnime(1);
-</script>
+        fetchAnime(1);
+    </script>
+</body>
+</html>
