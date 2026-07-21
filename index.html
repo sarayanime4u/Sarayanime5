@@ -211,15 +211,18 @@
 
         let currentPage = 1;
         let isLoading = false;
+        let hasMore = true;
 
         async function fetchAnime() {
-            if (isLoading) return;
+            if (isLoading || !hasMore) return;
             isLoading = true;
 
             const container = document.getElementById('animeContainer');
-            
+
             try {
                 const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${currentPage}&limit=20`);
+                if (!res.ok) throw new Error('Network error');
+                
                 const data = await res.json();
                 
                 if (currentPage === 1) container.innerHTML = '';
@@ -244,22 +247,30 @@
                         container.appendChild(card);
                     });
                     currentPage++;
+                    hasMore = data.pagination ? data.pagination.has_next_page : false;
+                } else {
+                    hasMore = false;
                 }
             } catch(e) {
-                console.error(e);
+                console.error('Error fetching anime:', e);
+            } finally {
+                // تقليل فترة الانتظار لتحديث أسرع مع حماية من حظر الـ API
+                setTimeout(() => { isLoading = false; }, 500);
             }
-            
-            // تأخير بسيط لمنع حظر الـ API عند السكرول السريع
-            setTimeout(() => { isLoading = false; }, 1000);
         }
 
-        // استشعار قوي للوصول لأسفل الشاشة
-        window.onscroll = function() {
-            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 500) {
+        // دالة دقيقة لاستشعار الاقتراب من أسفل الصفحة
+        function handleScroll() {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = window.innerHeight;
+
+            if (scrollTop + clientHeight >= scrollHeight - 600) {
                 fetchAnime();
             }
-        };
+        }
 
+        window.addEventListener('scroll', handleScroll);
         fetchAnime();
     </script>
 </body>
