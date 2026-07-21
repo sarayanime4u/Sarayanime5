@@ -27,7 +27,7 @@
         }
 
         /* 🌙 القمر والنجوم المحسنة للأداء */
-        .moon {
+        .moon { position: absolute !important;
             position: fixed;
             top: 4%;
             left: 8%;
@@ -212,47 +212,55 @@
         let currentPage = 1;
         let isLoading = false;
 
-        async function fetchAnime(page) {
+        async function fetchAnime() {
             if (isLoading) return;
             isLoading = true;
+
             const container = document.getElementById('animeContainer');
             
             try {
-                const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${page}&limit=20`);
+                const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${currentPage}&limit=20`);
                 const data = await res.json();
                 
-                if (page === 1) container.innerHTML = '';
+                if (currentPage === 1) container.innerHTML = '';
 
-                data.data.forEach(anime => {
-                    const card = document.createElement('div');
-                    card.className = 'anime-card';
-                    card.innerHTML = `
-                        <div class="poster-wrapper">
-                            <img class="poster-img" src="${anime.images.jpg.large_image_url}" loading="lazy">
-                            <div class="rating-badge"><i class="fa-solid fa-star"></i> ${anime.score || 'N/A'}</div>
-                        </div>
-                        <div class="anime-info">
-                            <div class="anime-title">${anime.title}</div>
-                            <div class="anime-meta">
-                                <span>${anime.type || 'TV'}</span>
-                                <span>${anime.episodes ? anime.episodes + ' حلقة' : 'مستمر'}</span>
+                if (data.data && data.data.length > 0) {
+                    data.data.forEach(anime => {
+                        const card = document.createElement('div');
+                        card.className = 'anime-card';
+                        card.innerHTML = `
+                            <div class="poster-wrapper">
+                                <img class="poster-img" src="${anime.images.jpg.large_image_url}" loading="lazy">
+                                <div class="rating-badge"><i class="fa-solid fa-star"></i> ${anime.score || 'N/A'}</div>
                             </div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-                currentPage++;
-            } catch(e) {}
-            isLoading = false;
+                            <div class="anime-info">
+                                <div class="anime-title">${anime.title}</div>
+                                <div class="anime-meta">
+                                    <span>${anime.type || 'TV'}</span>
+                                    <span>${anime.episodes ? anime.episodes + ' حلقة' : 'مستمر'}</span>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                    currentPage++;
+                }
+            } catch(e) {
+                console.error(e);
+            }
+            
+            // تأخير بسيط لمنع حظر الـ API عند السكرول السريع
+            setTimeout(() => { isLoading = false; }, 1000);
         }
 
-        window.addEventListener('scroll', () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 400) {
-                fetchAnime(currentPage);
+        // استشعار قوي للوصول لأسفل الشاشة
+        window.onscroll = function() {
+            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 500) {
+                fetchAnime();
             }
-        });
+        };
 
-        fetchAnime(1);
+        fetchAnime();
     </script>
 </body>
 </html>
