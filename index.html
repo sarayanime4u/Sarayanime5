@@ -17,7 +17,7 @@
         }
 
         body {
-            background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c1022 100%);
+            background: #0a0e17;
             min-height: 100vh;
             color: #fff;
             font-family: 'Tajawal', sans-serif;
@@ -26,18 +26,19 @@
             padding-bottom: 90px;
         }
 
-        /* 🌙 القمر والنجوم */
+        /* 🌙 القمر والنجوم المحسنة للأداء */
         .moon {
             position: fixed;
             top: 4%;
             left: 8%;
-            width: 75px;
-            height: 75px;
-            background: radial-gradient(circle at 35% 35%, #ffffff, #e6e6e6 50%, #d4d4d4 100%);
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 35% 35%, #ffffff, #d4d4d4 100%);
             border-radius: 50%;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
             z-index: 1;
             pointer-events: none;
+            will-change: transform;
         }
 
         .stars {
@@ -52,14 +53,9 @@
 
         .star {
             position: absolute;
-            background: white;
+            background: #fff;
             border-radius: 50%;
-            animation: twinkle var(--duration) infinite ease-in-out;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 6px rgba(255,255,255,0.8); }
+            opacity: 0.6;
         }
 
         /* 🚀 الحاوية الرئيسية */
@@ -71,7 +67,7 @@
             padding: 20px 18px;
         }
 
-        /* 🔝 الهيدر العلوي ليلي فخم */
+        /* 🔝 الهيدر العلوي */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -83,16 +79,8 @@
             font-family: 'Cinzel', serif;
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #70a1ff 0%, #ffffff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(112, 161, 255, 0.4);
-            animation: pulseFade 4s ease-in-out infinite;
-        }
-
-        @keyframes pulseFade {
-            0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(112, 161, 255, 0.6)); }
-            50% { opacity: 0.3; filter: drop-shadow(0 0 0px rgba(112, 161, 255, 0)); }
+            color: #8ab4f8;
+            text-shadow: 0 0 10px rgba(138, 180, 248, 0.3);
         }
 
         .header-actions {
@@ -104,8 +92,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
@@ -113,52 +100,42 @@
             color: #e0e6ed;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .icon-btn:active {
-            transform: scale(0.92);
-            border-color: rgba(112, 161, 255, 0.5);
-            box-shadow: 0 0 12px rgba(112, 161, 255, 0.3);
-        }
-
-        /* 🔍 شريط البحث الليلي الشفاف */
+        /* 🔍 شريط البحث الخفيف والسريع جداً دون تعليق */
         .search-box {
             position: relative;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .search-input {
             width: 100%;
-            padding: 15px 48px 15px 18px;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            padding: 14px 45px 14px 16px;
+            background: rgba(20, 28, 45, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
             color: #fff;
             font-family: 'Tajawal', sans-serif;
-            font-size: 0.98rem;
+            font-size: 1rem;
             outline: none;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
+            transition: border-color 0.2s;
         }
 
         .search-input:focus {
-            border-color: rgba(112, 161, 255, 0.5);
-            box-shadow: 0 0 15px rgba(112, 161, 255, 0.2);
-            background: rgba(255, 255, 255, 0.07);
+            border-color: #8ab4f8;
         }
 
         .search-icon {
             position: absolute;
             top: 50%;
-            right: 18px;
+            right: 16px;
             transform: translateY(-50%);
-            color: #70a1ff;
+            color: #8ab4f8;
             font-size: 1.1rem;
+            pointer-events: none;
         }
 
-        /* 🏷️ قائمة "الكل" الشفافة مع هايلايت ناعم */
+        /* 🏷️ قائمة الكل */
         .categories-container {
             display: flex;
             gap: 10px;
@@ -166,27 +143,21 @@
         }
 
         .category-chip {
-            padding: 10px 24px;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
             font-size: 0.95rem;
-            font-weight: 600;
             color: #e0e6ed;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* تأثير التفاعل والهايلايت الخفيف */
-        .category-chip.active, .category-chip:active {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(112, 161, 255, 0.6);
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(112, 161, 255, 0.25);
+        .category-chip.active {
+            border-color: #8ab4f8;
+            background: rgba(138, 180, 248, 0.12);
+            color: #fff;
         }
     </style>
 </head>
@@ -196,7 +167,6 @@
     <div class="stars" id="starsContainer"></div>
 
     <div class="app-container">
-        <!-- 🔝 الهيدر -->
         <header class="app-header">
             <h1 class="brand-title">Saray Anime</h1>
             <div class="header-actions">
@@ -205,34 +175,28 @@
             </div>
         </header>
 
-        <!-- 🔍 شريط البحث -->
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input type="text" class="search-input" placeholder="ابحث عن أنميك المفضل...">
         </div>
 
-        <!-- 🏷️ قائمة الكل فقط -->
         <div class="categories-container">
             <div class="category-chip active">
-                <i class="fa-solid fa-border-all" style="color: #70a1ff;"></i> الكل
+                <i class="fa-solid fa-border-all" style="color: #8ab4f8;"></i> الكل
             </div>
         </div>
     </div>
 
     <script>
-        // إنشاء النجوم
         const container = document.getElementById('starsContainer');
-        for (let i = 0; i < 90; i++) {
+        for (let i = 0; i < 40; i++) {
             const star = document.createElement('div');
             star.className = 'star';
-            const size = Math.random() * 2.2 + 0.8;
+            const size = Math.random() * 2 + 1;
             star.style.width = `${size}px`;
             star.style.height = `${size}px`;
             star.style.top = `${Math.random() * 100}%`;
             star.style.left = `${Math.random() * 100}%`;
-            const duration = Math.random() * 3 + 2;
-            star.style.setProperty('--duration', `${duration}s`);
-            star.style.animationDelay = `${Math.random() * 4}s`;
             container.appendChild(star);
         }
     </script>
