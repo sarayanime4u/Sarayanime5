@@ -26,7 +26,7 @@
             padding-bottom: 90px;
         }
 
-        /* 🌙 القمر والغيوم والنجوم */
+        /* 🌙 القمر والنجوم */
         .moon {
             position: fixed;
             top: 4%;
@@ -62,7 +62,7 @@
             50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 6px rgba(255,255,255,0.8); }
         }
 
-        /* 🚀 الحاوية الرئيسية للتطبيق */
+        /* 🚀 الحاوية الرئيسية */
         .app-container {
             position: relative;
             z-index: 10;
@@ -71,7 +71,7 @@
             padding: 20px 18px;
         }
 
-        /* 🔝 الهيدر العلوي */
+        /* 🔝 الهيدر العلوي ليلي فخم */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -83,16 +83,16 @@
             font-family: 'Cinzel', serif;
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #ff4b4b 0%, #ff8585 100%);
+            background: linear-gradient(135deg, #70a1ff 0%, #ffffff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
+            text-shadow: 0 0 15px rgba(112, 161, 255, 0.4);
             animation: pulseFade 4s ease-in-out infinite;
         }
 
         @keyframes pulseFade {
-            0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(255, 75, 75, 0.6)); }
-            50% { opacity: 0.3; filter: drop-shadow(0 0 0px rgba(255, 75, 75, 0)); }
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(112, 161, 255, 0.6)); }
+            50% { opacity: 0.3; filter: drop-shadow(0 0 0px rgba(112, 161, 255, 0)); }
         }
 
         .header-actions {
@@ -104,24 +104,25 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: #e0e6ed;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s ease;
         }
 
         .icon-btn:active {
-            transform: scale(0.9);
-            background: rgba(255, 75, 75, 0.3);
+            transform: scale(0.92);
+            border-color: rgba(112, 161, 255, 0.5);
+            box-shadow: 0 0 12px rgba(112, 161, 255, 0.3);
         }
 
-        /* 🔍 شريط البحث */
+        /* 🔍 شريط البحث الليلي الشفاف */
         .search-box {
             position: relative;
             margin-bottom: 25px;
@@ -130,21 +131,22 @@
         .search-input {
             width: 100%;
             padding: 15px 48px 15px 18px;
-            background: rgba(18, 26, 45, 0.65);
+            background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             color: #fff;
             font-family: 'Tajawal', sans-serif;
             font-size: 0.98rem;
             outline: none;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            transition: 0.3s;
+            transition: all 0.3s ease;
         }
 
         .search-input:focus {
-            border-color: #ff4b4b;
-            box-shadow: 0 0 18px rgba(255, 75, 75, 0.3);
+            border-color: rgba(112, 161, 255, 0.5);
+            box-shadow: 0 0 15px rgba(112, 161, 255, 0.2);
+            background: rgba(255, 255, 255, 0.07);
         }
 
         .search-icon {
@@ -152,42 +154,39 @@
             top: 50%;
             right: 18px;
             transform: translateY(-50%);
-            color: #ff8585;
+            color: #70a1ff;
             font-size: 1.1rem;
         }
 
-        /* 🏷️ شريط الأقسام (Horizontal Scroll) */
-        .categories-scroll {
+        /* 🏷️ قائمة "الكل" الشفافة مع هايلايت ناعم */
+        .categories-container {
             display: flex;
             gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            scrollbar-width: none;
-        }
-
-        .categories-scroll::-webkit-scrollbar {
-            display: none;
+            margin-bottom: 20px;
         }
 
         .category-chip {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(10px);
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 25px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            white-space: nowrap;
+            color: #e0e6ed;
             cursor: pointer;
-            transition: 0.3s;
-            color: #d1d5db;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .category-chip.active, .category-chip:hover {
-            background: linear-gradient(135deg, #ff4b4b, #d63031);
-            color: #fff;
-            border-color: transparent;
-            box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4);
+        /* تأثير التفاعل والهايلايت الخفيف */
+        .category-chip.active, .category-chip:active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(112, 161, 255, 0.6);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(112, 161, 255, 0.25);
         }
     </style>
 </head>
@@ -212,14 +211,11 @@
             <input type="text" class="search-input" placeholder="ابحث عن أنميك المفضل...">
         </div>
 
-        <!-- 🏷️ الأقسام -->
-        <div class="categories-scroll">
-            <div class="category-chip active">🔥 الكل</div>
-            <div class="category-chip">⚡ أكشن</div>
-            <div class="category-chip">👻 رعب</div>
-            <div class="category-chip">✨ مغامرات</div>
-            <div class="category-chip">💖 دراما</div>
-            <div class="category-chip">🤖 خيال علمي</div>
+        <!-- 🏷️ قائمة الكل فقط -->
+        <div class="categories-container">
+            <div class="category-chip active">
+                <i class="fa-solid fa-border-all" style="color: #70a1ff;"></i> الكل
+            </div>
         </div>
     </div>
 
