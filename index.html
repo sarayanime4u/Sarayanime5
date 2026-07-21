@@ -27,7 +27,7 @@
         }
 
         /* 🌙 القمر والنجوم المحسنة للأداء */
-        .moon { position: absolute !important;
+        .moon { position: fixed !important; top: 25px; left: 8%; width: 70px; height: 70px; background: radial-gradient(circle at 35% 35%, #ffffff, #d4d4d4 100%); border-radius: 50%; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); z-index: 0; pointer-events: none; }
             position: fixed;
             top: 4%;
             left: 8%;
@@ -213,14 +213,6 @@
         let isLoading = false;
         let hasNextPage = true;
 
-        const appContainer = document.querySelector('.app-container');
-        const sentinel = document.createElement('div');
-        sentinel.id = 'sentinel';
-        sentinel.style.cssText = 'height: 60px; display: flex; align-items: center; justify-content: center; color: #8ab4f8; font-size: 0.9rem; margin-top: 15px; width: 100%; grid-column: 1 / -1;';
-        sentinel.innerText = 'جاري تحميل المزيد... 🚀';
-        appContainer.appendChild(sentinel);
-
-        // استعلام GraphQL الخاص بـ AniList العالمي
         const query = `
         query ($page: Int, $perPage: Int) {
           Page (page: $page, perPage: $perPage) {
@@ -272,7 +264,6 @@
                     const card = document.createElement('div');
                     card.className = 'anime-card';
                     
-                    // استخدام الاسم أو العرض
                     const title = anime.title.english || anime.title.romaji || anime.title.native;
                     const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : 'N/A';
                     const episodes = anime.episodes ? `${anime.episodes} حلقة` : 'مستمر';
@@ -294,22 +285,21 @@
                 });
 
                 currentPage++;
-                if (!hasNextPage) sentinel.innerText = 'وصلت لنهاية الأنميات ✨';
             } catch (error) {
                 console.error(error);
-                sentinel.innerText = 'حدث خطأ، جاري إعادة المحاولة...';
             } finally {
                 isLoading = false;
             }
         }
 
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
+        // استشعار السكرول بأسفل الشاشة بدون جمل نصوص
+        window.onscroll = function() {
+            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 600) {
                 fetchAniListAnime();
             }
-        }, { rootMargin: '200px' });
+        };
 
-        observer.observe(sentinel);
+        fetchAniListAnime();
     </script>
 </body>
 </html>
