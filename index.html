@@ -211,8 +211,8 @@
 
         let currentPage = 1;
         let isLoading = false;
+        let hasNextPage = true;
 
-        // إضافة عنصر المراقبة بأسفل الصفحة
         const appContainer = document.querySelector('.app-container');
         const sentinel = document.createElement('div');
         sentinel.id = 'sentinel';
@@ -220,59 +220,92 @@
         sentinel.innerText = 'جاري تحميل المزيد... 🚀';
         appContainer.appendChild(sentinel);
 
-        async function fetchAnime() {
-            if (isLoading) return;
+        // استعلام GraphQL الخاص بـ AniList العالمي
+        const query = `
+        query ($page: Int, $perPage: Int) {
+          Page (page: $page, perPage: $perPage) {
+            pageInfo {
+              hasNextPage
+            }
+            media (type: ANIME, sort: POPULARITY_DESC) {
+              id
+              title {
+                romaji
+                native
+                english
+              }
+              coverImage {
+                extraLarge
+              }
+              averageScore
+              episodes
+              format
+            }
+          }
+        }
+        `;
+
+        async function fetchAniListAnime() {
+            if (isLoading || !hasNextPage) return;
             isLoading = true;
 
             const container = document.getElementById('animeContainer');
 
             try {
-                // انتظار ثانيتين بين كل طلب وطلب لتجنب حظر السيرفر
-                const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${currentPage}&limit=20`);
-                
-                if (res.status === 429) {
-                    sentinel.innerText = 'انتظر ثانية... جاري جلب الأنميات ⏳';
-                    setTimeout(() => { isLoading = false; fetchAnime(); }, 2000);
-                    return;
-                }
+                const response = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        variables: { page: currentPage, perPage: 20 }
+                    })
+                });
 
-                const data = await res.json();
+                const resData = await response.json();
+                const pageData = resData.data.Page;
+                hasNextPage = pageData.pageInfo.hasNextPage;
 
-                if (data.data && data.data.length > 0) {
-                    data.data.forEach(anime => {
-                        const card = document.createElement('div');
-                        card.className = 'anime-card';
-                        card.innerHTML = `
-                            <div class="poster-wrapper">
-                                <img class="poster-img" src="${anime.images.jpg.large_image_url}" loading="lazy">
-                                <div class="rating-badge"><i class="fa-solid fa-star"></i> ${anime.score || 'N/A'}</div>
+                pageData.media.forEach(anime => {
+                    const card = document.createElement('div');
+                    card.className = 'anime-card';
+                    
+                    // استخدام الاسم أو العرض
+                    const title = anime.title.english || anime.title.romaji || anime.title.native;
+                    const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : 'N/A';
+                    const episodes = anime.episodes ? `${anime.episodes} حلقة` : 'مستمر';
+
+                    card.innerHTML = `
+                        <div class="poster-wrapper">
+                            <img class="poster-img" src="${anime.coverImage.extraLarge}" loading="lazy">
+                            <div class="rating-badge"><i class="fa-solid fa-star"></i> ${score}</div>
+                        </div>
+                        <div class="anime-info">
+                            <div class="anime-title">${title}</div>
+                            <div class="anime-meta">
+                                <span>${anime.format || 'TV'}</span>
+                                <span>${episodes}</span>
                             </div>
-                            <div class="anime-info">
-                                <div class="anime-title">${anime.title}</div>
-                                <div class="anime-meta">
-                                    <span>${anime.type || 'TV'}</span>
-                                    <span>${anime.episodes ? anime.episodes + ' حلقة' : 'مستمر'}</span>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
-                    currentPage++;
-                    sentinel.innerText = 'جاري تحميل المزيد... 🚀';
-                } else {
-                    sentinel.innerText = 'وصلت لنهاية الأنميات ✨';
-                }
-            } catch(e) {
-                sentinel.innerText = 'حدث خطأ بالاتصال، جاري إعادة المحاولة...';
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                currentPage++;
+                if (!hasNextPage) sentinel.innerText = 'وصلت لنهاية الأنميات ✨';
+            } catch (error) {
+                console.error(error);
+                sentinel.innerText = 'حدث خطأ، جاري إعادة المحاولة...';
             } finally {
-                setTimeout(() => { isLoading = false; }, 1500);
+                isLoading = false;
             }
         }
 
-        // مراقب الرؤية الأسطوري (Intersection Observer)
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
-                fetchAnime();
+                fetchAniListAnime();
             }
         }, { rootMargin: '200px' });
 
