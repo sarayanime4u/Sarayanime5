@@ -295,9 +295,9 @@
 
         <div id="animeContainer" class="anime-grid"></div>
     <script>
-        // 1. بناء تصميم وحاوية التفاصيل تلقائياً داخل الصفحة
-        const modalStyle = document.createElement('style');
-        modalStyle.innerHTML = `
+        // 1. إضافة تنسيقات ومشغل الفيديو الداخلي بداخل الصفحة
+        const appStyle = document.createElement('style');
+        appStyle.innerHTML = `
             .details-modal {
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                 background: #0a0e17; z-index: 10000; overflow-y: auto;
@@ -325,12 +325,34 @@
             .synopsis-text { font-size: 0.88rem; color: #c5d1e0; line-height: 1.6; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
             .episodes-sec-title { font-size: 0.95rem; color: #fff; margin: 22px 0 12px 0; font-weight: 700; }
             .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
-            .ep-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 8px; border-radius: 12px; text-align: center; color: #e0e6ed; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-            .ep-card:active { background: rgba(138, 180, 248, 0.25); border-color: #8ab4f8; color: #fff; }
-        `;
-        document.head.appendChild(modalStyle);
+            .ep-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 8px; border-radius: 12px; text-align: center; color: #e0e6ed; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+            .ep-card:active { background: rgba(138, 180, 248, 0.3); border-color: #8ab4f8; color: #fff; }
 
-        const modalHTML = `
+            /* 🎬 مشغل الفيديو المدمج بداخل التطبيق */
+            .player-modal {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: #000; z-index: 20000; display: none;
+                flex-direction: column; justify-content: center; align-items: center;
+            }
+            .player-modal.active { display: flex; }
+            .player-header {
+                position: absolute; top: 0; left: 0; width: 100%;
+                padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 20002;
+            }
+            .player-title { color: #fff; font-size: 1rem; font-weight: bold; }
+            .close-player-btn {
+                background: rgba(255,255,255,0.2); border: none; color: #fff;
+                width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem;
+                display: flex; align-items: center; justify-content: center; cursor: pointer;
+            }
+            .video-container { width: 100%; max-width: 900px; aspect-ratio: 16/9; background: #000; position: relative; }
+            .video-container iframe { width: 100%; height: 100%; border: none; }
+        `;
+        document.head.appendChild(appStyle);
+
+        // إضافة هيكلية المشغل للـ DOM
+        const playerHTML = `
         <div id="detailsModal" class="details-modal">
             <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
             <div id="modalBanner" class="banner-header"><div class="banner-overlay"></div></div>
@@ -348,14 +370,25 @@
                 </div>
                 <div class="synopsis-title"><i class="fa-solid fa-align-right"></i> القصة:</div>
                 <div id="modalSynopsis" class="synopsis-text">...</div>
-                <div class="episodes-sec-title"><i class="fa-solid fa-list-ol" style="color: #8ab4f8;"></i> الحلقات:</div>
+                <div class="episodes-sec-title"><i class="fa-solid fa-list-ol" style="color: #8ab4f8;"></i> اختر الحلقة للمشاهدة:</div>
                 <div id="episodesGrid" class="episodes-grid"></div>
             </div>
         </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-        // 2. النجوم السريعة
+        <!-- نافذة مشغل الفيديو الداخلي -->
+        <div id="playerModal" class="player-modal">
+            <div class="player-header">
+                <div id="playerTitle" class="player-title">مشاهدة الحلقة</div>
+                <button class="close-player-btn" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="video-container">
+                <iframe id="videoIframe" src="" allowfullscreen></iframe>
+            </div>
+        </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', playerHTML);
+
+        // 2. النجوم
         const starsContainer = document.getElementById('starsContainer');
         for (let i = 0; i < 40; i++) {
             const star = document.createElement('div');
@@ -368,7 +401,7 @@
             starsContainer.appendChild(star);
         }
 
-        // 3. جلب الأنميات والربط مع الضغط
+        // 3. جلب البيانات والربط
         let currentPage = 1;
         let isLoading = false;
         let hasNextPage = true;
@@ -379,6 +412,7 @@
             pageInfo { hasNextPage }
             media (type: ANIME, sort: POPULARITY_DESC) {
               id
+              idMal
               title { romaji native english }
               coverImage { extraLarge }
               bannerImage
@@ -460,10 +494,13 @@
             const epGrid = document.getElementById('episodesGrid');
             epGrid.innerHTML = '';
             const totalEps = anime.episodes || 12;
+            
             for (let i = 1; i <= Math.min(totalEps, 50); i++) {
                 const epCard = document.createElement('div');
                 epCard.className = 'ep-card';
                 epCard.innerText = `حلقة ${i}`;
+                // تشغيل الفيديو بداخل التطبيق فوراً
+                epCard.onclick = () => playEpisode(title, i, anime.idMal || anime.id);
                 epGrid.appendChild(epCard);
             }
 
@@ -472,9 +509,29 @@
         }
 
         function closeModal() {
-            const modal = document.getElementById('detailsModal');
-            modal.classList.remove('active');
+            document.getElementById('detailsModal').classList.remove('active');
             document.body.style.overflow = 'auto';
+        }
+
+        // دالة تشغيل الفيديو الداخلي
+        function playEpisode(animeTitle, epNum, malId) {
+            const playerModal = document.getElementById('playerModal');
+            const playerTitle = document.getElementById('playerTitle');
+            const videoIframe = document.getElementById('videoIframe');
+
+            playerTitle.innerText = `${animeTitle} - حلقة ${epNum}`;
+            
+            // سيرفر تشغيل مدمج سريع يضمن عمل الفيديو داخل التطبيق بدون توجيه متصفح
+            videoIframe.src = `https://2embed.org/embed/anime/${malId}/${epNum}`;
+            
+            playerModal.classList.add('active');
+        }
+
+        function closePlayer() {
+            const playerModal = document.getElementById('playerModal');
+            const videoIframe = document.getElementById('videoIframe');
+            videoIframe.src = ''; // إيقاف الصوت عند الإغلاق
+            playerModal.classList.remove('active');
         }
 
         window.onscroll = function() {
